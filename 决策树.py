@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-06-30 09:12:32
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-01 15:53:18
+@LastEditTime: 2020-07-01 15:54:15
 '''
 import numpy as np
 
@@ -235,12 +235,12 @@ class CartRegressionTree:
             self.right = None
         
         def __str__(self):
-            if self.children:
+            if self.left:
                 s = '内部节点<%s>:\n' % self.feature_index
-                for fv, node in self.children.items():
-                    ss = '[%s]-> %s' % (fv, node)
-                    s += '\t' + ss.replace('\n', '\n\t') + '\n'
-                s = s[:-1]
+                ss = '[ >%s]-> %s' % (self.feature_value, self.left)
+                s += '\t' + ss.replace('\n', '\n\t') + '\n'
+                ss = '[<=%s]-> %s' % (self.feature_value, self.right)
+                s += '\t' + ss.replace('\n', '\n\t')
             else:
                 s = '叶节点(%s)' % self.value
             return s
