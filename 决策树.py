@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-06-30 09:12:32
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-01 15:51:43
+@LastEditTime: 2020-07-01 15:53:18
 '''
 import numpy as np
 
@@ -245,7 +245,7 @@ class CartRegressionTree:
                 s = '叶节点(%s)' % self.value
             return s
 
-    def __init__(self, mse_threshold = 0.01, mes_dec_threshold = 0., min_samples_split = 2):
+    def __init__(self, mse_threshold = 0.01, mse_dec_threshold = 0., min_samples_split = 2):
         self.mse_threshold = mse_threshold
         self.mse_dec_threshold = mse_dec_threshold
         self.min_samples_split = min_samples_split
@@ -253,7 +253,7 @@ class CartRegressionTree:
     def _mse(self, y):
         return np.var(y)
 
-    def _mse_split(self, y, feature, vlaue):
+    def _mse_split(self, y, feature, value):
         indices = feature > value
         y1 = y[indices]
         y2 = y[~indices]
@@ -263,7 +263,7 @@ class CartRegressionTree:
 
     def _get_split_points(self, feature):
         values = np.unique(feature)
-        split_points = [(v1+v2)/2 for v1, v2 in zip(vlaues[:-1], values[1:])]
+        split_points = [(v1+v2)/2 for v1, v2 in zip(values[:-1], values[1:])]
         return split_points
 
     def _select_feature(self, X, y):
