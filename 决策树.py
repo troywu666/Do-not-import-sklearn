@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-06-30 09:12:32
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-01 10:23:09
+@LastEditTime: 2020-07-01 15:51:43
 '''
 import numpy as np
 
@@ -222,5 +222,109 @@ class CartClassificationTree:
     def train(self, X_train, y_train):
         self.tree_ = self._create_tree(X_train, y_train)
 
+    def predict(self, X_test):
+        return np.apply_along_axis(self._predict_one, axis = 1, arr = X_test)
+
+class CartRegressionTree:
+    class Node:
+        def __init__(self):
+            self.value = None
+            self.feature_index = None
+            self.feature_value = None
+            self.left = None
+            self.right = None
+        
+        def __str__(self):
+            if self.children:
+                s = '内部节点<%s>:\n' % self.feature_index
+                for fv, node in self.children.items():
+                    ss = '[%s]-> %s' % (fv, node)
+                    s += '\t' + ss.replace('\n', '\n\t') + '\n'
+                s = s[:-1]
+            else:
+                s = '叶节点(%s)' % self.value
+            return s
+
+    def __init__(self, mse_threshold = 0.01, mes_dec_threshold = 0., min_samples_split = 2):
+        self.mse_threshold = mse_threshold
+        self.mse_dec_threshold = mse_dec_threshold
+        self.min_samples_split = min_samples_split
+    
+    def _mse(self, y):
+        return np.var(y)
+
+    def _mse_split(self, y, feature, vlaue):
+        indices = feature > value
+        y1 = y[indices]
+        y2 = y[~indices]
+        mse1 = self._mse(y1)
+        mse2 = self._mse(y2)
+        return (y1.size * mse1 + y2.size * mse2) / y.size
+
+    def _get_split_points(self, feature):
+        values = np.unique(feature)
+        split_points = [(v1+v2)/2 for v1, v2 in zip(vlaues[:-1], values[1:])]
+        return split_points
+
+    def _select_feature(self, X, y):
+        # 最佳分割特征的index
+        best_feature_index = None
+        # 最佳分割点
+        best_split_value = None
+        min_mse = np.inf
+        _, n = X.shape
+        for feature_index in range(n):
+            feature = X[:, feature_index]
+            split_points = self._get_split_points(feature)
+            for value in split_points:
+                # 迭代每一个分割点value，计算使用value分割后的数据集mse
+                mse = self._mse_split(y, feature, value)
+                if mse < min_mse:
+                    min_mse = mse
+                    best_feature_index = feature_index
+                    best_split_value = value
+        if self._mse(y) - min_mse < self.mse_dec_threshold:
+            best_feature_index = None
+            best_split_value = None
+
+        return best_feature_index, best_split_value, min_mse
+
+    def _node_value(self, y):
+        '''计算节点的值'''
+        return np.mean(y)
+
+    def _create_tree(self, X, y):
+        node = self.Node()
+        node.value = self._node_value(y)
+        if y.size < self.min_samples_split:
+            return node
+        if self._mse(y) < self.mse_threshold:
+            return node
+
+        # 选择最佳分割特征
+        feature_index, feature_value, min_mse = self._select_feature(X, y)
+        if feature_index is not None:
+            node.feature_index = feature_index
+            node.feature_value = feature_value
+            feature = X[:, feature_index]
+            indices = feature < feature_value
+            X1, y1 = y[indices]
+            X2, y2 = y[~indices]
+            node.left = self._create_tree(X1, y1)
+            node.right = self._create_tree(X2, y2)
+        return node
+
+    def _predict_one(self, X_test):
+        node = self.tree_
+        while node.left:
+            if X_test[node.feature_index] > node.feature_value:
+                node = node.left
+            else:
+                node.right
+        return node.value
+
+    def train(self, X_train, y_train):
+        self.tree_ = self._create_tree(X_train, y_train)
+        
     def predict(self, X_test):
         return np.apply_along_axis(self._predict_one, axis = 1, arr = X_test)
