@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-07-03 09:17:54
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-03 14:10:34
+@LastEditTime: 2020-07-03 14:14:50
 '''
 import numpy as np
 
@@ -45,7 +45,11 @@ class KMeans:
     def predict(self, X):
         res = None
         while not res:
-            res = self.kmeans(X)
+            res = self._kmeans(X)
 
         labels, self.centers_ = res
         return labels
+
+class KMeans_plus_plus:
+    def __init__(self, k_clusters, tol, max_iter, n_init):
+        
