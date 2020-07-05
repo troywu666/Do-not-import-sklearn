@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-07-05 11:04:07
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-05 19:02:39
+@LastEditTime: 2020-07-05 19:10:01
 '''
 import numpy as np
 
@@ -156,12 +156,14 @@ class ANNRegressor:
                     else:
                         out = z
                     in_list[i], z_list[i], out_list[i] = in_, z, out
-                    
+                # 输出层
                 delta_list[-1] = t - out
+                # 隐藏层
                 for i in range(layer_n - 2, -1, -1):
                     out_i, W_j, delta_j = out_list[i], W_list[i + 1], delta_list[i + 1]
                     delta_list[i] = out_i * (1. - out_i) * np.matmul(W_j[1:], delta_j[:, None]).T[0]
-
+            
+            # 更新所有节点的权重
             for i in range(layer_n):
                 in_i, delta_i = in_list[i], delta_list[i]
                 W_list[i] += in_i[:, None] * delta_i * self.eta
