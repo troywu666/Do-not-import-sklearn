@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-07-05 11:04:07
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-05 18:31:58
+@LastEditTime: 2020-07-05 19:02:39
 '''
 import numpy as np
 
@@ -126,7 +126,7 @@ class ANNRegressor:
 
     def _backpropagation(self, X, y):
         m, n = X.shape
-        _, out = y.shape
+        _, n_out = y.shape
         layer_sizes = self.hidden_layer_sizes + (n_out,)
         layer_n = len(layer_sizes)
         W_list = []
@@ -142,3 +142,52 @@ class ANNRegressor:
         delta_list = [None] * layer_n
         
         idx = np.arange(m)
+        for _ in range(self.max_iter):
+            np.random.shuffle(idx)
+            X, y = X[idx], y[idx]
+            for x, t in zip(X, y):
+                out = x
+                for i in range(layer_n):
+                    in_ = np.ones(out.size + 1)
+                    in_[1:] = out
+                    z = self._z(in_, W_list[i])
+                    if i != layer_n - 1:
+                        out = self._sigmoid(z)
+                    else:
+                        out = z
+                    in_list[i], z_list[i], out_list[i] = in_, z, out
+                    
+                delta_list[-1] = t - out
+                for i in range(layer_n - 2, -1, -1):
+                    out_i, W_j, delta_j = out_list[i], W_list[i + 1], delta_list[i + 1]
+                    delta_list[i] = out_i * (1. - out_i) * np.matmul(W_j[1:], delta_j[:, None]).T[0]
+
+            for i in range(layer_n):
+                in_i, delta_i = in_list[i], delta_list[i]
+                W_list[i] += in_i[:, None] * delta_i * self.eta
+            y_pred = self._predict(X, W_list)
+            err = self._error(y, y_pred)
+
+            if err < self.tol:
+                break
+        return W_list
+
+    def train(self, X, y):
+        self.W_list = self._backpropagation(X, y)
+    
+    def _predict(self, X, W_list):
+        layer_n = len(W_list)
+        out = X
+        for i in range(layer_n):
+            m, n = out.shape
+            in_ = np.ones((m, n + 1))
+            in_[: , 1:] = out
+            z = self._z(in_, self.W_list)
+            if i != layer - 1:
+                out = self._sigmoid(z)
+            else:
+                out = z
+        return out
+
+    def predict(self, X):
+        return self._sigmoid(X, self.W_list)
