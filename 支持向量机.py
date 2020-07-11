@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-07-05 19:22:45
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-07 16:43:59
+@LastEditTime: 2020-07-11 21:19:55
 '''
 import numpy as np
 
@@ -190,3 +190,16 @@ class SMO:
     def predict(self, X):
         y_pred = np.apply_along_axis(self._predict_one, axis = 1, arr = X)
         return np.squeeze(np.where(y_pred > 0, 1., -1.))
+
+##################################################################### SMO的其它实现
+def smoSimple(xMat, yMat, C, toler, maxIter):
+    b = 0
+    m, n = xMat.shape
+    alpha = np.mat(np.zeros((m, 1)))
+    iters = 0
+    while (iters < maxIter):
+        alpha_ = 0
+        for i in range(m):
+            fxi = np.multiply(alpha, yMat).T*(xMat*xMat[i: ].T) + b
+            Ei = fxi - yMat[i]
+            if 
