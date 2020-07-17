@@ -4,7 +4,7 @@
 @Autor: Troy Wu
 @Date: 2020-07-15 15:20:22
 @LastEditors: Troy Wu
-@LastEditTime: 2020-07-15 20:57:26
+@LastEditTime: 2020-07-17 15:49:41
 '''
 import numpy as np
 
@@ -55,7 +55,8 @@ class Apriori:
                 if sorted(L1) == sorted(L2):
                     nextLk.append(Lk[i] | Lk[j])
         return nextLk
-        
+    
+    # 生成频繁项集
     def generateLk(self):
         C1 = self.createC1(self.data)
         L1, supportData = self.scanD(C1)
